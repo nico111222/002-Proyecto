@@ -29,7 +29,7 @@ def create_access(access: PermissionsAccessCreate, db: Session = Depends(get_db)
     
     # Crear el nuevo usuario con los campos necesarios
     db_access = Permissions_Access(
-        IDUser=access.IDUsers,
+        IDUsers=access.IDUsers,
         IDRoll=access.IDRoll,
         IDScreen=access.IDScreen,
         Status=access.Status
@@ -59,14 +59,14 @@ def update_access(id:int,access: PermissionsAccessUpdate, db: Session = Depends(
     return db_access
 
 #Elimina
-@router.delete("/delete_access", response_model=PermissionsAccess)
-def delete_access(id:int,access: PermissionsAccessUpdate, db: Session = Depends(get_db)):
- # Buscar por ID
+@router.delete("/delete_access/{id}", response_model=PermissionsAccess)
+def delete_access(id: int, db: Session = Depends(get_db)):
     db_access = db.query(Permissions_Access).filter(Permissions_Access.IDAccess == id).first()
     
-    # Actualizar solo los campos provistos
-    db_access.Status = 0
+    if not db_access:
+        raise HTTPException(status_code=404, detail="Access not found")
 
+    db_access.Status = 0
     db.commit()
     db.refresh(db_access)
     return db_access
